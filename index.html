@@ -33,11 +33,11 @@
             <form id="tipForm">
                 <div class="payment-options">
                     <div id="cashOption" class="payment-option" data-type="cash">
-                        <i class="fas fa-euro-sign"></i>
+                        <i class="fa-solid fa-coins"></i>
                         <span>Cash</span>
                     </div>
                     <div id="cardOption" class="payment-option" data-type="card">
-                        <i class="fas fa-credit-card"></i>
+                        <i class="fa-solid fa-credit-card"></i>
                         <span>Card</span>
                     </div>                    
                 </div>
@@ -50,16 +50,16 @@
     <section class="history">
         <h2>Tip History</h2>
         <div class="history-summary">
-            Total Tips: <span id="totalTipsAmount">$0.00</span>
+            Total Tips: <span id="totalTipsAmount">€0.00</span>
             <button id="clearHistoryButton">Clear History</button>
         </div>
         <div class="payment_preview">
             <div id="cashTotal" class="payment-total" data-type="cash">
-                <i class="fas fa-euro-sign"></i>
+                <i class="fa-solid fa-coins"></i>
                 <span id="totalCashTipsAmount">€0.00</span>
             </div>
             <div id="cardOption" class="payment-total" data-type="card">
-                <i class="fas fa-credit-card"></i>
+                <i class="fa-solid fa-credit-card"></i>
                 <span id="totalCardTipsAmount">€0.00</span>
             </div> 
         </div>
@@ -191,7 +191,14 @@ window.onload = function() {
     const isShiftActive = getCookie("isShiftActive") === "true";
     if (savedShiftStartTime && isShiftActive) {
         shiftStartTime = new Date(savedShiftStartTime);
-        document.getElementById('shiftStartTime').textContent = `Started at: ${shiftStartTime.toLocaleString()}`;
+
+        const day = String(shiftStartTime.getDate()).padStart(2, '0');
+        const month = String(shiftStartTime.getMonth() + 1).padStart(2, '0');
+        const year = shiftStartTime.getFullYear();
+        const hours =  String(shiftStartTime.getHours()).padStart(2, '0');
+        const minutes = String(shiftStartTime.getMinutes()).padStart(2, '0');
+        
+        document.getElementById('shiftStartTime').textContent = `Shift on ${day}/${month}/${year}, started at: ${hours}:${minutes}`;
         document.getElementById('shiftInfo').style.display = 'block';
         document.getElementById('startShiftButton').style.display = 'none';
         document.getElementById('endShiftButton').style.display = 'inline';
@@ -218,7 +225,7 @@ function addTipToHistory(orderId, dateTime, amount, addToTotal = true, index = t
     const newRow = document.createElement('tr');
 
     const formattedDateTime = formatDateTime(dateTime);
-    const paymentIcon = paymentType === 'cash' ? '<i class="fas fa-euro-sign"></i>' : '<i class="fas fa-credit-card"></i>';
+    const paymentIcon = paymentType === 'cash' ? '<i class="fa-solid fa-coins"></i>' : '<i class="fa-solid fa-credit-card"></i>';
     
     // Combine tip amount with payment icon
     newRow.innerHTML = `
@@ -307,6 +314,9 @@ document.querySelectorAll('.payment-option').forEach(option => {
         this.classList.add('selected');
         setCookie("selectedPaymentType", selectedPaymentType, 7); // Save the selected payment type
         toggleTipInput(true);
+
+        document.getElementById('tipAmount').focus();
+        document.getElementById('tipAmount').placeholder = "Tip Amount";
     });
 });
 
@@ -387,7 +397,13 @@ function resetChart() {
 
 document.getElementById('startShiftButton').addEventListener('click', function() {
     shiftStartTime = new Date();
-    document.getElementById('shiftStartTime').textContent = `Started at: ${shiftStartTime.toLocaleString()}`;
+    const day = String(shiftStartTime.getDate()).padStart(2, '0');
+    const month = String(shiftStartTime.getMonth() + 1).padStart(2, '0');
+    const year = shiftStartTime.getFullYear();
+    const hours =  String(shiftStartTime.getHours()).padStart(2, '0');
+    const minutes = String(shiftStartTime.getMinutes()).padStart(2, '0');
+    
+    document.getElementById('shiftStartTime').textContent = `Shift on ${day}/${month}/${year}, started at: ${hours}:${minutes}`;
     document.getElementById('shiftInfo').style.display = 'block';
     this.style.display = 'none';
     document.getElementById('endShiftButton').style.display = 'inline';
@@ -407,9 +423,9 @@ document.getElementById('endShiftButton').addEventListener('click', function() {
 
     document.getElementById('durationMessage').textContent = `You worked for: ${duration}`;
     document.getElementById('durationTips').innerHTML = `
-        <i class="fas fa-euro-sign"></i> Tips: $${totalCashInShift.toFixed(2)}
-        <i class="fas fa-credit-card"></i> Tips: $${totalCardInShift.toFixed(2)}<br><br>
-        Total Tips in Shift: $${totalTipsInShift.toFixed(2)}`;
+        <i class="fa-solid fa-coins"></i> Tips: €${totalCashInShift.toFixed(2)}
+        <i class="fa-solid fa-credit-card"></i> Tips: €${totalCardInShift.toFixed(2)}<br><br>
+        Total Tips in Shift: €${totalTipsInShift.toFixed(2)}`;
     
     document.getElementById('durationModal').style.display = 'block';
     shiftStartTime = null; 
