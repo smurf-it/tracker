@@ -66,10 +66,9 @@
         <table id="tipHistory">
             <thead>
                 <tr>
-                    <th>Order ID</th>
-                    <th>Date and Time</th>
-                    <th>Tip Amount</th>
-                    <th>Method</th>
+                    <th>ID</th>
+                    <th>Time</th>
+                    <th>Amount</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -220,12 +219,12 @@ function addTipToHistory(orderId, dateTime, amount, addToTotal = true, index = t
 
     const formattedDateTime = formatDateTime(dateTime);
     const paymentIcon = paymentType === 'cash' ? '<i class="fas fa-euro-sign"></i>' : '<i class="fas fa-credit-card"></i>';
-
+    
+    // Combine tip amount with payment icon
     newRow.innerHTML = `
         <td>${orderId}</td>
         <td>${formattedDateTime}</td>
-        <td>€<span class="tip-amount">${amount.toFixed(2)}</span></td>
-        <td>${paymentIcon}</td>
+        <td>${paymentIcon} €<span class="tip-amount">${amount.toFixed(2)}</span></td>
         <td>
             <button class="editTipButton" data-index="${index}">Edit</button>
         </td>`;
@@ -247,6 +246,16 @@ function addTipToHistory(orderId, dateTime, amount, addToTotal = true, index = t
     });
 }
 
+function formatShiftDate(dateTime) {
+    const date = new Date(dateTime);
+    const day = String(date.getDay()).padStart(2, '0');
+    const month = String(date.getMonth()).padStart(2, '0');
+    const year = String(date.getFullYear());
+
+    return `${day}/${month}/${year}`;
+
+}
+
 function formatDateTime(dateTime) {
     const date = new Date(dateTime);
     const hours = String(date.getHours()).padStart(2, '0');
@@ -265,6 +274,7 @@ function updateTotalTipsDisplay() {
     document.getElementById('totalCashTipsAmount').textContent = `€${totalCash.toFixed(2)}`;
     document.getElementById('totalCardTipsAmount').textContent = `€${totalCard.toFixed(2)}`;
 }
+
 
 document.getElementById('tipForm').addEventListener('submit', function(event) {
     event.preventDefault();
@@ -303,20 +313,48 @@ document.querySelectorAll('.payment-option').forEach(option => {
 
 
 
+// document.getElementById('editTipForm').addEventListener('submit', function(event) {
+//     event.preventDefault();
+//     const index = parseInt(this.dataset.index); 
+//     const newAmount = parseFloat(document.getElementById('editTipAmount').value);
+//     tips[index] = { dateTime: tips[index].dateTime, amount: newAmount };
+//     setCookie("tips", JSON.stringify(tips), 7);
+//     const tableBody = document.querySelector('#tipHistory tbody');
+//     const rows = tableBody.querySelectorAll('tr');
+//     rows[index].querySelector('.tip-amount').textContent = newAmount.toFixed(2);
+//     chartData.datasets[0].data[index] = newAmount; 
+//     tipsChart.update();
+//     updateTotalTipsDisplay();
+//     document.getElementById('editTipModal').style.display = 'none';
+// });
+
 document.getElementById('editTipForm').addEventListener('submit', function(event) {
     event.preventDefault();
-    const index = parseInt(this.dataset.index); 
+    const index = parseInt(this.dataset.index);
     const newAmount = parseFloat(document.getElementById('editTipAmount').value);
-    tips[index] = { dateTime: tips[index].dateTime, amount: newAmount };
+    
+    // Get the original payment type to preserve it
+    const paymentType = tips[index].paymentType;
+
+    // Update the amount in the tips array
+    tips[index] = { ...tips[index], amount: newAmount }; // Keep other properties
+
     setCookie("tips", JSON.stringify(tips), 7);
+
     const tableBody = document.querySelector('#tipHistory tbody');
     const rows = tableBody.querySelectorAll('tr');
     rows[index].querySelector('.tip-amount').textContent = newAmount.toFixed(2);
-    chartData.datasets[0].data[index] = newAmount; 
+    
+    // Update chart data
+    chartData.datasets[0].data[index] = newAmount;
     tipsChart.update();
+
+    // Update total amounts after editing
     updateTotalTipsDisplay();
+
     document.getElementById('editTipModal').style.display = 'none';
 });
+
 
 document.getElementById('cancelEditButton').addEventListener('click', function() {
     document.getElementById('editTipModal').style.display = 'none'; 
