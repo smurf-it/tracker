@@ -186,23 +186,34 @@ window.onload = function() {
         updateTotalTipsDisplay(); 
     }
 
+    
+
     // Check for active shift
     const savedShiftStartTime = getCookie("shiftStartTime");
     const isShiftActive = getCookie("isShiftActive") === "true";
-    if (savedShiftStartTime && isShiftActive) {
-        shiftStartTime = new Date(savedShiftStartTime);
-
-        const day = String(shiftStartTime.getDate()).padStart(2, '0');
-        const month = String(shiftStartTime.getMonth() + 1).padStart(2, '0');
-        const year = shiftStartTime.getFullYear();
-        const hours =  String(shiftStartTime.getHours()).padStart(2, '0');
-        const minutes = String(shiftStartTime.getMinutes()).padStart(2, '0');
+    if(isShiftActive) {
+        //Load Last orderID
+        const savedOrderIdCounter = getCookie("orderIdCounter");
+        if(savedOrderIdCounter){
+            orderIdCounter = parseInt(savedOrderIdCounter, 10);
+        }
         
-        document.getElementById('shiftStartTime').textContent = `Shift on ${day}/${month}/${year}, started at: ${hours}:${minutes}`;
-        document.getElementById('shiftInfo').style.display = 'block';
-        document.getElementById('startShiftButton').style.display = 'none';
-        document.getElementById('endShiftButton').style.display = 'inline';
-        document.getElementById('tipEntrySection').style.display = 'block'; 
+        //Load shift start time
+        if(savedShiftStartTime) {
+            shiftStartTime = new Date(savedShiftStartTime);
+
+            const day = String(shiftStartTime.getDate()).padStart(2, '0');
+            const month = String(shiftStartTime.getMonth() + 1).padStart(2, '0');
+            const year = shiftStartTime.getFullYear();
+            const hours =  String(shiftStartTime.getHours()).padStart(2, '0');
+            const minutes = String(shiftStartTime.getMinutes()).padStart(2, '0');
+
+            document.getElementById('shiftStartTime').textContent = `Shift on ${day}/${month}/${year}, started at: ${hours}:${minutes}`;
+            document.getElementById('shiftInfo').style.display = 'block';
+            document.getElementById('startShiftButton').style.display = 'none';
+            document.getElementById('endShiftButton').style.display = 'inline';
+            document.getElementById('tipEntrySection').style.display = 'block'; 
+        }
     }
 
     // Reset payment method
@@ -244,6 +255,8 @@ function addTipToHistory(orderId, dateTime, amount, addToTotal = true, index = t
         updateTotalTipsDisplay();
         updateChart(dateTime, amount);
     }
+
+    //orderIdCounter++;
 
     newRow.querySelector('.editTipButton').addEventListener('click', function() {
         const tipIndex = index;
@@ -290,6 +303,7 @@ document.getElementById('tipForm').addEventListener('submit', function(event) {
     const orderId = orderIdCounter; // Incrementing order ID
     addTipToHistory(orderId, currentTime, tipAmount, true, tips.length, selectedPaymentType);
     orderIdCounter++; // Increment the order ID for the next tip
+    setCookie("orderIdCounter", orderIdCounter, 7);
     event.target.reset(); 
     updateTotalTipsDisplay(); 
     selectedPaymentType = null; // Reset the payment type
@@ -397,6 +411,10 @@ function resetChart() {
 
 document.getElementById('startShiftButton').addEventListener('click', function() {
     shiftStartTime = new Date();
+    //Init order ID
+    orderIdCounter = 1;
+    setCookie("orderIdCounter", orderIdCounter, 7);
+
     const day = String(shiftStartTime.getDate()).padStart(2, '0');
     const month = String(shiftStartTime.getMonth() + 1).padStart(2, '0');
     const year = shiftStartTime.getFullYear();
@@ -433,7 +451,12 @@ document.getElementById('endShiftButton').addEventListener('click', function() {
     this.style.display = 'none';
     document.getElementById('startShiftButton').style.display = 'inline';
     document.getElementById('tipEntrySection').style.display = 'none'; 
+
+    //Reset order ID
+    orderIdCounter = 1;
+    setCookie("orderIdCounter", orderIdCounter, 7);
     setCookie("shiftStartTime", "", -1); 
+
 });
 
 
